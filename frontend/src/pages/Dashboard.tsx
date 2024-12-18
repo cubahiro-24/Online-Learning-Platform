@@ -27,10 +27,11 @@ export default function Dashboard() {
           </h2>
           {enrolledCourses.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {enrolledCourses.map((course) => (
-                <CourseCard key={course.id} course={course} />
-              ))}
-            </div>
+            {enrolledCourses.map((course) => (
+              <CourseCard key={course.id} course={course} variant="dashboard" />
+            ))}
+          </div>
+          
           ) : (
             <p className="text-gray-600 dark:text-gray-400">
               You haven't enrolled in any courses yet.
