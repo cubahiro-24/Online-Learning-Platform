@@ -1,5 +1,6 @@
 package com.onlinelearning.controller;
 
+import com.onlinelearning.dto.CourseDTO;
 import com.onlinelearning.model.Course;
 import com.onlinelearning.service.CourseService;
 import lombok.RequiredArgsConstructor;
@@ -10,13 +11,23 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/courses")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:5173")
 public class CourseController {
     private final CourseService courseService;
 
     @GetMapping
-    public List<Course> getAllCourses() {
-        return courseService.getAllCourses();
+    public ResponseEntity<List<CourseDTO>> getAllCourses(
+        @RequestParam(required = false) String userId
+    ) {
+        return ResponseEntity.ok(courseService.getAllCourses(userId));
     }
+
+    @GetMapping("/{id}")
+public ResponseEntity<Course> getCourseById(@PathVariable String id) {
+    return courseRepository.findById(id)
+        .map(ResponseEntity::ok)
+        .orElse(ResponseEntity.notFound().build());
+}
 
     @PostMapping
     public Course createCourse(@RequestBody Course course) {

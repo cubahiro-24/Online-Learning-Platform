@@ -1,11 +1,26 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowRight } from 'lucide-react';
 import CourseCard from '../components/CourseCard';
 import TestimonialCarousel from '../components/TestimonialCarousel';
-import { COURSE_DATA } from '../data/courses';
+import axios from 'axios';
+import { Course } from '../types';
 
 export default function Home() {
-  const popularCourses = Object.values(COURSE_DATA).slice(0, 3);
+  const [popularCourses, setPopularCourses] = useState<Course[]>([]);
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const response = await axios.get('http://localhost:8080/api/courses');
+        // Take first 3 courses
+        setPopularCourses(response.data.slice(0, 3));
+      } catch (error) {
+        console.error('Error fetching courses:', error);
+      }
+    };
+
+    fetchCourses();
+  }, []);
 
   return (
     <div className="pt-16">

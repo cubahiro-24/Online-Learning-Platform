@@ -10,7 +10,10 @@ public class Course {
     @Id
     private String id;
     private String title;
-    private String description;
-    private String content;
+    private String instructor;
+    private double rating;
     private String imageUrl;
+    private String description;
+    private String duration;
+    private int lessons;
 }
