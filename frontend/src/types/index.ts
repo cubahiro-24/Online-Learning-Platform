@@ -5,6 +5,8 @@ export interface Course {
   rating: number;
   imageUrl: string;
   description: string;
+  duration: string;
+  lessons: number;
   progress?: number;
 }
 

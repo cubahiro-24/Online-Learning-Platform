@@ -16,4 +16,5 @@ public class Course {
     private String description;
     private String duration;
     private int lessons;
+    // Add any other fields you need
 }

@@ -24,9 +24,9 @@ public class CourseController {
 
     @GetMapping("/{id}")
 public ResponseEntity<Course> getCourseById(@PathVariable String id) {
-    return courseRepository.findById(id)
-        .map(ResponseEntity::ok)
-        .orElse(ResponseEntity.notFound().build());
+    Course course = courseService.findById(id)
+            .orElseThrow(() -> new RuntimeException("Course not found with id: " + id));
+    return ResponseEntity.ok(course);
 }
 
     @PostMapping

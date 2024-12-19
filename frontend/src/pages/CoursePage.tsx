@@ -1,21 +1,51 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Star, Clock, BookOpen } from 'lucide-react';
 import { useCourseStore } from '../store/useCourseStore';
 import { useAuthStore } from '../store/useAuthStore';
-import { COURSE_DATA } from '../data/courses';
+import axios from 'axios';
+import { Course } from '../types';
 
 export default function CoursePage() {
   const { courseId } = useParams();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuthStore();
   const { enrolledCourses, enroll } = useCourseStore();
+  const [course, setCourse] = useState<Course | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const course = COURSE_DATA[courseId as keyof typeof COURSE_DATA];
+  useEffect(() => {
+    const fetchCourse = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(`http://localhost:8080/api/courses/${courseId}`);
+        if (response.data) {
+          setCourse(response.data);
+        }
+      } catch (error) {
+        console.error('Error fetching course:', error);
+        // Add user-friendly error handling
+        if (axios.isAxiosError(error) && error.response?.status === 404) {
+          // Handle not found error
+          console.log('Course not found');
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    if (courseId) {
+      fetchCourse();
+    }
+  }, [courseId]);
   const isEnrolled = enrolledCourses.some((c) => c.id === courseId);
 
+  if (loading) {
+    return <div className="min-h-screen pt-24 flex items-center justify-center">Loading...</div>;
+  }
+
   if (!course) {
-    return <div>Course not found</div>;
+    return <div className="min-h-screen pt-24 flex items-center justify-center">Course not found</div>;
   }
 
   const handleEnroll = () => {
@@ -24,6 +54,7 @@ export default function CoursePage() {
       return;
     }
     enroll(course);
+    navigate('/dashboard');
   };
 
   return (
