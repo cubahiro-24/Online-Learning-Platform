@@ -9,7 +9,7 @@ import { Course } from '../types';
 export default function CoursePage() {
   const { courseId } = useParams();
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuthStore();
+  const { user, isAuthenticated } = useAuthStore();
   const { enrolledCourses, enroll } = useCourseStore();
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
@@ -24,21 +24,21 @@ export default function CoursePage() {
         }
       } catch (error) {
         console.error('Error fetching course:', error);
-        // Add user-friendly error handling
         if (axios.isAxiosError(error) && error.response?.status === 404) {
-          // Handle not found error
           console.log('Course not found');
         }
       } finally {
         setLoading(false);
       }
     };
-  
+
     if (courseId) {
       fetchCourse();
     }
   }, [courseId]);
-  const isEnrolled = enrolledCourses.some((c) => c.id === courseId);
+
+  const isEnrolled = isAuthenticated && 
+    enrolledCourses.some((c) => c.id === courseId);
 
   if (loading) {
     return <div className="min-h-screen pt-24 flex items-center justify-center">Loading...</div>;
@@ -48,13 +48,15 @@ export default function CoursePage() {
     return <div className="min-h-screen pt-24 flex items-center justify-center">Course not found</div>;
   }
 
-  const handleEnroll = () => {
+  const handleEnroll = async () => {
     if (!isAuthenticated) {
       navigate('/login');
       return;
     }
-    enroll(course);
-    navigate('/dashboard');
+    if (user?.id && course) {
+      await enroll(user.id, course);
+      navigate('/dashboard');
+    }
   };
 
   return (

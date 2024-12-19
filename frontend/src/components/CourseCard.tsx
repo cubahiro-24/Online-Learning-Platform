@@ -2,6 +2,7 @@ import React from 'react';
 import { Course } from '../types';
 import { useNavigate } from 'react-router-dom';
 import { useCourseStore } from '../store/useCourseStore';
+import { useAuthStore } from '../store/useAuthStore';
 
 interface CourseCardProps {
   course: Course;
@@ -11,13 +12,16 @@ interface CourseCardProps {
 const CourseCard: React.FC<CourseCardProps> = ({ course, variant }) => {
   const navigate = useNavigate();
   const { updateProgress } = useCourseStore();
+  const { user } = useAuthStore();
 
   const handleCourseClick = () => {
     navigate(`/courses/${course.id}`);
   };
 
-  const handleMarkAsCompleted = () => {
-    updateProgress(course.id, 100);
+  const handleMarkAsCompleted = async () => {
+    if (user?.id) {
+      await updateProgress(user.id, course.id, 100);
+    }
   };
 
   return (
@@ -44,16 +48,15 @@ const CourseCard: React.FC<CourseCardProps> = ({ course, variant }) => {
 
         {variant === 'dashboard' && (
           <>
-            {/* Progress Bar */}
             <div className="mb-4">
               <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
                 <div
                   className="bg-blue-600 h-2.5 rounded-full"
-                  style={{ width: `${course.progress}%` }}
+                  style={{ width: `${course.progress ?? 0}%` }}
                 ></div>
               </div>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                Progress: {course.progress}%
+                Progress: {course.progress ?? 0}%
               </p>
             </div>
 
