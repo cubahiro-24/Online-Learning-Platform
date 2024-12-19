@@ -24,6 +24,6 @@ public class AuthController {
                 user.getUsername(),
                 user.getRole().toString()
             )))
-            .orElse(ResponseEntity.badRequest().body("Invalid credentials"));
+            .orElseGet(() -> ResponseEntity.badRequest().body(new AuthResponse(null, "Invalid credentials", null)));
     }
 }

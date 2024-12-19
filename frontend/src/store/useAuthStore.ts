@@ -1,42 +1,47 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import axios from 'axios';
-
-// Configure axios defaults
-axios.defaults.headers.common['Accept'] = 'application/json';
-axios.defaults.headers.common['Content-Type'] = 'application/json';
-// Remove withCredentials as we're using token-based auth
-// axios.defaults.withCredentials = true;
-
-interface User {
-  id: string;
-  username: string;
-  role: string;
-}
+import { User } from '../types';
 
 interface AuthState {
   user: User | null;
-  token: string | null;
   isAuthenticated: boolean;
-  login: (userId: string, username: string, token: string, role: string) => void;
+  login: (username: string, password: string) => Promise<void>;
   logout: () => void;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  token: null,
-  isAuthenticated: false,
-  login: (userId, username, token, role) => {
-    const user = { id: userId, username, role };
-    set({ user, token, isAuthenticated: true });
-    
-    // Set Authorization header for future requests
-    if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      user: null,
+      isAuthenticated: false,
+      login: async (username: string, password: string) => {
+        try {
+          const response = await axios.post('http://localhost:8080/api/auth/login', {
+            username,
+            password,
+          });
+
+          const userData = response.data;
+          const user: User = {
+            id: userData.id,
+            name: userData.username,
+            email: userData.email,
+            role: userData.role,
+          };
+
+          set({ user, isAuthenticated: true });
+        } catch (error) {
+          console.error('Login failed:', error);
+          throw error;
+        }
+      },
+      logout: () => {
+        set({ user: null, isAuthenticated: false });
+      },
+    }),
+    {
+      name: 'auth-storage',
     }
-  },
-  logout: () => {
-    set({ user: null, token: null, isAuthenticated: false });
-    // Clear authorization header
-    delete axios.defaults.headers.common['Authorization'];
-  },
-}));
+  )
+);

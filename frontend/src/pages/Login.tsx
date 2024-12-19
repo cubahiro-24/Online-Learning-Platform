@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
-import axios from 'axios';
+import { useCourseStore } from '../store/useCourseStore';
 
 export default function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const login = useAuthStore((state) => state.login);
+  const { login } = useAuthStore();
+  const { fetchEnrolledCourses } = useCourseStore();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -15,19 +16,15 @@ export default function Login() {
     setError('');
 
     try {
-      const response = await axios.post('http://localhost:8080/api/auth/login', {
-        username,
-        password
-      });
-
-      const { userId, username: userName, token, role } = response.data;
-      
-      // Update auth store with user data
-      await login(userId, userName, token, role);
+      await login(username, password);
+      const user = useAuthStore.getState().user;
+      if (user?.id) {
+        await fetchEnrolledCourses(user.id);
+      }
       navigate('/dashboard');
     } catch (error) {
-      console.error('Login failed:', error);
       setError('Invalid username or password');
+      console.error('Login failed:', error);
     }
   };
 
@@ -41,9 +38,7 @@ export default function Login() {
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           {error && (
-            <div className="text-red-500 text-sm text-center">
-              {error}
-            </div>
+            <div className="text-red-500 text-sm text-center">{error}</div>
           )}
           <div className="space-y-4">
             <div>
