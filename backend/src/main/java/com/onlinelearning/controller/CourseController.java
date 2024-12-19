@@ -48,4 +48,9 @@ public ResponseEntity<Course> getCourseById(@PathVariable String id) {
         courseService.deleteCourse(id);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/enrolled/{userId}")
+    public ResponseEntity<List<CourseDTO>> getEnrolledCourses(@PathVariable String userId) {
+        return ResponseEntity.ok(courseService.getEnrolledCourses(userId));
+    }
 }

@@ -13,6 +13,8 @@ export default function CoursePage() {
   const { enrolledCourses, enroll } = useCourseStore();
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
+  const [enrolling, setEnrolling] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchCourse = async () => {
@@ -24,9 +26,7 @@ export default function CoursePage() {
         }
       } catch (error) {
         console.error('Error fetching course:', error);
-        if (axios.isAxiosError(error) && error.response?.status === 404) {
-          console.log('Course not found');
-        }
+        setError('Failed to load course details');
       } finally {
         setLoading(false);
       }
@@ -37,8 +37,31 @@ export default function CoursePage() {
     }
   }, [courseId]);
 
-  const isEnrolled = isAuthenticated && 
-    enrolledCourses.some((c) => c.id === courseId);
+  const isEnrolled = enrolledCourses.some((c) => c.id === courseId);
+
+  const handleEnroll = async () => {
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+
+    if (!user?.id || !course) {
+      setError('Unable to enroll at this time');
+      return;
+    }
+
+    try {
+      setEnrolling(true);
+      setError(null);
+      await enroll(user.id, course);
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Enrollment failed:', error);
+      setError('Failed to enroll in the course. Please try again.');
+    } finally {
+      setEnrolling(false);
+    }
+  };
 
   if (loading) {
     return <div className="min-h-screen pt-24 flex items-center justify-center">Loading...</div>;
@@ -47,17 +70,6 @@ export default function CoursePage() {
   if (!course) {
     return <div className="min-h-screen pt-24 flex items-center justify-center">Course not found</div>;
   }
-
-  const handleEnroll = async () => {
-    if (!isAuthenticated) {
-      navigate('/login');
-      return;
-    }
-    if (user?.id && course) {
-      await enroll(user.id, course);
-      navigate('/dashboard');
-    }
-  };
 
   return (
     <div className="min-h-screen pt-24 bg-gray-50 dark:bg-gray-900">
@@ -109,16 +121,28 @@ export default function CoursePage() {
               {course.description}
             </p>
 
+            {error && (
+              <div className="p-4 mb-4 text-red-700 bg-red-100 rounded-lg">
+                {error}
+              </div>
+            )}
+
             <button
               onClick={handleEnroll}
-              disabled={isEnrolled}
+              disabled={isEnrolled || enrolling}
               className={`px-8 py-3 rounded-md text-lg font-medium ${
                 isEnrolled
                   ? 'bg-gray-300 cursor-not-allowed'
+                  : enrolling
+                  ? 'bg-indigo-400 cursor-wait'
                   : 'bg-indigo-600 hover:bg-indigo-700 text-white'
               }`}
             >
-              {isEnrolled ? 'Already Enrolled' : 'Enroll Now'}
+              {isEnrolled 
+                ? 'Already Enrolled' 
+                : enrolling 
+                ? 'Enrolling...' 
+                : 'Enroll Now'}
             </button>
           </div>
         </div>

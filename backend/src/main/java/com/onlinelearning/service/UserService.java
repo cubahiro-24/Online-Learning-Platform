@@ -48,4 +48,12 @@ public class UserService {
             .orElseThrow(() -> new RuntimeException("User not found"));
         userRepository.delete(user);
     }
+
+    public User enrollUserInCourse(String userId, String courseId) {
+        User user = getUserById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        user.enrollInCourse(courseId);
+        return userRepository.save(user);
+    }
 }

@@ -14,10 +14,16 @@ public class User {
     private String username;
     private String password;
     private String email;
-    private UserRole role = UserRole.USER; // Default role
+    private UserRole role = UserRole.USER;
     private List<String> enrolledCourses = new ArrayList<>();
 
-    // Enum for user roles
+    // Add method to handle course enrollment
+    public void enrollInCourse(String courseId) {
+        if (!enrolledCourses.contains(courseId)) {
+            enrolledCourses.add(courseId);
+        }
+    }
+
     public enum UserRole {
         ADMIN, USER
     }

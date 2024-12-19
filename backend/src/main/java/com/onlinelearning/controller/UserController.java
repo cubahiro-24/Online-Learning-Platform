@@ -60,4 +60,13 @@ public class UserController {
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());
     }
+
+    @PostMapping("/{userId}/enroll/{courseId}")
+    public ResponseEntity<User> enrollInCourse(
+        @PathVariable String userId,
+        @PathVariable String courseId
+    ) {
+        User updatedUser = userService.enrollUserInCourse(userId, courseId);
+        return ResponseEntity.ok(updatedUser);
+    }
 }
