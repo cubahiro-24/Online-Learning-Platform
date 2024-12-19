@@ -57,7 +57,7 @@ const CourseCard: React.FC<CourseCardProps> = ({ course, variant }) => {
               </p>
             </div>
 
-            {course.progress < 100 && (
+            {(course.progress ?? 0) < 100 && (
               <button
                 onClick={handleMarkAsCompleted}
                 className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out"

@@ -1,35 +1,33 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
-
-// Mock user data for login simulation
-const mockUsers = [
-  { id: 1, email: 'tony@example.com', password: 'password123', name: 'Tony Ariel' },
-  { id: 2, email: 'alice@example.com', password: 'alice2024', name: 'Alice Johnson' },
-  { id: 3, email: 'bob@example.com', password: 'bob123', name: 'Bob Smith' },
-];
+import axios from 'axios';
 
 export default function Login() {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const login = useAuthStore((state) => state.login);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
 
-    // Check if provided email and password match any user in the mock dataset
-    const user = mockUsers.find(
-      (user) => user.email === email && user.password === password
-    );
+    try {
+      const response = await axios.post('http://localhost:8080/api/auth/login', {
+        username,
+        password
+      });
 
-    if (user) {
-      // Successful login
-      await login(user.email, user.password); // Assuming login is an async function
+      const { userId, username: userName, token, role } = response.data;
+      
+      // Update auth store with user data
+      await login(userId, userName, token, role);
       navigate('/dashboard');
-    } else {
-      // Login failed
-      console.error('Login failed: Invalid email or password');
+    } catch (error) {
+      console.error('Login failed:', error);
+      setError('Invalid username or password');
     }
   };
 
@@ -42,18 +40,23 @@ export default function Login() {
           </h2>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          {error && (
+            <div className="text-red-500 text-sm text-center">
+              {error}
+            </div>
+          )}
           <div className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Email address
+              <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Username
               </label>
               <input
-                id="email"
-                name="email"
-                type="email"
+                id="username"
+                name="username"
+                type="text"
                 required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
               />
             </div>

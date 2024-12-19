@@ -35,9 +35,9 @@ export default function Navigation() {
             <Link to="/" className="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400">
               Home
             </Link>
-            <Link to="/courses/1" className="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400">
+            {/* <Link to="/courses/1" className="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400">
               Courses
-            </Link>
+            </Link> */}
             {isAuthenticated && (
               <Link to="/dashboard" className="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400">
                 Dashboard
