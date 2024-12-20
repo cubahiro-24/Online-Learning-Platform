@@ -12,16 +12,16 @@ export default function Home() {
     const fetchCourses = async () => {
       try {
         const response = await axios.get('http://localhost:8080/api/courses');
-        // Take first 3 courses
-        setPopularCourses(response.data.slice(0, 3));
+        // Set all courses instead of slicing
+        setPopularCourses(response.data);
       } catch (error) {
         console.error('Error fetching courses:', error);
       }
     };
-
+  
     fetchCourses();
   }, []);
-
+  
   return (
     <div className="pt-16">
       {/* Hero Section */}
@@ -49,7 +49,7 @@ export default function Home() {
       <section className="py-20 bg-gray-50 dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-12 text-center">
-            Popular Courses
+            Available Courses
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
   {popularCourses.map((course) => (
